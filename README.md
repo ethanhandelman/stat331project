@@ -6,3 +6,5 @@ Group members:
 Ethan Handelman
 
 Maxwell Dubow
+
+Aaron Eliscu
