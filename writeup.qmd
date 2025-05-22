@@ -1,0 +1,25 @@
+---
+title: "STAT 331: Final Project"
+author: "Ethan Handelman, Maxwell Dubow, Aaron Eliscu"
+format: 
+  html:
+    embed-resources: true
+    code-tools: true
+    toc: true
+editor: source
+execute: 
+  error: true
+  echo: true
+  message: false
+  warning: false
+---
+
+## Setup
+
+```{r setup}
+library(tidyverse)
+library(knitr)
+
+
+```
+
