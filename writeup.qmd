@@ -26,9 +26,7 @@ coal_per_cap <- read_csv("Data/coal_consumption_per_cap.csv",
 
 ```
 
-## Objectives
-
-# Pivoting/Joining the Data
+## Pivoting/Joining the Data
 
 ```{r}
 life_expectancy <- life_expectancy |>
@@ -48,6 +46,13 @@ lex_coal <- coal_per_cap |>
 
 ## Data Description
 
+In this investigative report we will be comparing two quantitative variables across countries/years:
 
+- **Coal consumption per capita (measured in tonnes oil equivalent)**
+
+    Source: [BP Statistical Review](https://www.bp.com/statisticalreview)
+- **Infant life expectancy**
+
+    Source: [Gapminder](https://www.gapminder.org/data/documentation/gd004/)
 
 ## Hypothesis
