@@ -20,12 +20,31 @@ execute:
 library(tidyverse)
 library(knitr)
 
+life_expectancy <- read_csv("Data/lex.csv")
+coal_per_cap <- read_csv("Data/coal_consumption_per_cap.csv",
+           na = c("NA", ""))
 
 ```
 
 ## Objectives
 
+# Pivoting/Joining the Data
 
+```{r}
+life_expectancy <- life_expectancy |>
+  pivot_longer(cols = 2:last_col(),
+    names_to = "year",
+    values_to = "infant_lex")
+
+coal_per_cap <- coal_per_cap |>
+  mutate(across(.cols = 2:last_col(), as.double)) |>
+  pivot_longer(cols = 2:last_col(),
+               names_to = "year",
+               values_to = "coal_cons_per_cap")
+
+lex_coal <- coal_per_cap |>
+  left_join(life_expectancy, by = c("country", "year"))
+```
 
 ## Data Description
 
