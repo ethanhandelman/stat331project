@@ -12,6 +12,7 @@ execute:
   echo: true
   message: false
   warning: false
+bibliography: references.bib
 ---
 
 ## Setup
@@ -46,13 +47,22 @@ lex_coal <- coal_per_cap |>
 
 ## Data Description
 
-In this investigative report we will be comparing two quantitative variables across countries/years:
+In this investigative report we will be exploring the relationship between two quantitative variables across countries/years:
 
-- **Coal consumption per capita (measured in tonnes oil equivalent)**
+-   **Coal consumption per capita (measured in tonnes oil equivalent)**
 
     Source: [BP Statistical Review](https://www.bp.com/statisticalreview)
-- **Infant life expectancy**
+
+-   **Infant life expectancy**
 
     Source: [Gapminder](https://www.gapminder.org/data/documentation/gd004/)
 
+The data on coal consumption per capita comes from BP Statistical Review's report on global energy markets over time. The data we are interested in is the amount of coal consumption per country per year. The data set, which we downloaded from Gapminder contains countries as observations and coal consumption in a specific year as variables. We transformed the data so that coal consumption was the only variable and each observation was a country and year.
+
+The data on infant life expectancy comes from Gapminder's own data collection from various different sources. It contains information on the life expectancy at birth in each country and year. The data set, which we downloaded from Gapminder contains countries as observations and infant life expectancy in a specific year as variables. We transformed the data so that life expectancy was the only variable and each observation was a country and year.
+
+Finally, we combined these two data sets so that for each observation (country and year), we had coal consumption and infant life expectancy as our two variables. There were a few missing values in the data, which we ignored in our analysis.
+
 ## Hypothesis
+
+We hypothesize that infant life expectancy will have a negative association with coal consumption after adjusting for year. This is because burning coal releases many by products into the atmosphere that form toxic chemicals, and "continuous inhalation of these hazardous substances triggers many diseases such respiratory and cardiovascular disease, systemic inflammation, and neurodegeneration"  [@Gasparotto_Da_Boit_Martinello_2021]. However, with the elimination of a lot of the infectious disease deaths that affected young children and the better understanding of treading cardiovascular conditions and cancer, life expectancy has drastically increased each year [@Crimmins_2015]. Therefore, we will have to adjust for this effect in our analysis to see if there is a negative association between coal consumption and infant life expectancy like we expect.
