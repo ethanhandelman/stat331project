@@ -20,7 +20,8 @@ bibliography: references.bib
 ```{r setup}
 library(tidyverse)
 library(knitr)
-
+library(ggplot2)
+library(plotly)
 life_expectancy <- read_csv("Data/lex.csv")
 coal_per_cap <- read_csv("Data/coal_consumption_per_cap.csv",
            na = c("NA", ""))
@@ -33,13 +34,15 @@ coal_per_cap <- read_csv("Data/coal_consumption_per_cap.csv",
 life_expectancy <- life_expectancy |>
   pivot_longer(cols = 2:last_col(),
     names_to = "year",
-    values_to = "infant_lex")
+    values_to = "infant_lex") |>
+  drop_na(infant_lex)
 
 coal_per_cap <- coal_per_cap |>
   mutate(across(.cols = 2:last_col(), as.double)) |>
   pivot_longer(cols = 2:last_col(),
                names_to = "year",
-               values_to = "coal_cons_per_cap")
+               values_to = "coal_cons_per_cap") |>
+  drop_na(coal_cons_per_cap)
 
 lex_coal <- coal_per_cap |>
   left_join(life_expectancy, by = c("country", "year"))
@@ -66,3 +69,33 @@ Finally, we combined these two data sets so that for each observation (country a
 ## Hypothesis
 
 We hypothesize that infant life expectancy will have a negative association with coal consumption after adjusting for year. This is because burning coal releases many by products into the atmosphere that form toxic chemicals, and "continuous inhalation of these hazardous substances triggers many diseases such respiratory and cardiovascular disease, systemic inflammation, and neurodegeneration"  [@Gasparotto_Da_Boit_Martinello_2021]. However, with the elimination of a lot of the infectious disease deaths that affected young children and the better understanding of treading cardiovascular conditions and cancer, life expectancy has drastically increased each year [@Crimmins_2015]. Therefore, we will have to adjust for this effect in our analysis to see if there is a negative association between coal consumption and infant life expectancy like we expect.
+
+##Data Visualization
+
+```{r}
+p <- lex_coal |>
+  group_by(country) |>
+  summarize(mean_coal = mean(coal_cons_per_cap),
+            mean_infant = mean(infant_lex)) |>
+  filter(mean_coal != 0 & mean_infant != 0) |>
+  mutate(log_mean_coal = log(mean_coal),
+         log_mean_infant = log(mean_infant)) |>
+  
+  ggplot(mapping = aes(x = log_mean_coal, 
+                       y = log_mean_infant, 
+                       label = country,
+                       text = paste0("<b>Country:</b> ", 
+                                     country, 
+                                     "<br>"))) +
+  geom_point() +
+  geom_smooth(method = "lm", se = F) +
+  # geom_text(check_overlap = TRUE) +
+  labs(x = "Log Mean Coal Consumption (tonnes oil equivalent)",
+       y = "Log Infant Life Expectancy (years)",
+       title = "Infant Life Expectancy vs Coal Consumption by Country") + theme(axis.title = element_text(size = 14),
+                                                                                plot.title = element_text(hjust = 0.5))
+
+ggplotly(p, tooltip = "text")
+
+```
+
