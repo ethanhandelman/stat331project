@@ -107,7 +107,6 @@ p <- lex_coal_cont |>
                                      "<br>"))) +
   geom_point() +
   geom_smooth(method = "lm", se = F) +
-  # geom_text(check_overlap = TRUE) +
   labs(x = "Log Mean Coal Consumption (tonnes oil equivalent)",
        y = "Log Infant Life Expectancy (years)",
        title = "Infant Life Expectancy vs Coal Consumption by Country") + theme(axis.title = element_text(size = 14),
@@ -117,13 +116,9 @@ ggplotly(p, tooltip = "text")
 
 ```
 
-```{r}
+```{r animated_colored, dev = "png",dev.args = list(type = "cairo")}
 p_anim <- ggplot(lex_coal, aes(x = coal_cons_per_cap, y = infant_lex)) +
   geom_point(alpha = 0.7, size = 2, color = "#2c3e50") +
-  # For raw‐scale axes, comment these out; 
-  # for log log, uncomment them:
-  # scale_x_continuous(trans = "log10") +
-  # scale_y_continuous(trans = "log10") +
   labs(
     title = "Infant Life Expectancy vs. Coal Consumption",
     subtitle = "Year: {frame_time}",
@@ -139,18 +134,18 @@ p_anim <- ggplot(lex_coal, aes(x = coal_cons_per_cap, y = infant_lex)) +
   transition_time(year) +
   ease_aes("linear")
 
-anim <- animate(
-  p_anim,
-  nframes = length(unique(lex_coal$year)) * 5,
-  fps = 10,
-  width = 800,
-  height = 600,
-  renderer = gifski_renderer(loop = TRUE)
-)
-
-anim
-
-anim_save("coal_infant_by_continent.gif", animation = anim)
+# anim <- animate(
+#   p_anim,
+#   nframes = length(unique(lex_coal$year)) * 5,
+#   fps = 10,
+#   width = 800,
+#   height = 600,
+#   renderer = gifski_renderer(loop = TRUE)
+# )
+# 
+# anim
+# 
+# anim_save("coal_infant_by_continent.gif", animation = anim)
 ```
 ![Animated Relationship](coal_infant_by_continent.gif)
 
