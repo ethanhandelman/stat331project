@@ -159,7 +159,6 @@ anim_save("coal_infant_by_continent.gif", animation = anim)
 ```{r}
 
 model <- lm(log_mean_infant ~ log_mean_coal, data = lex_coal_cont)
-
 coefs <- broom::tidy(model)
 
 knitr::kable(
@@ -170,5 +169,23 @@ knitr::kable(
 ) |>
   kableExtra::kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover"))
 
+```
+
+```{r}
+var_response <- var(lex_coal_cont$log_mean_infant)
+var_fitted <- var(fitted(model))
+var_residuals <- var(residuals(model))
+r_squared <- var_fitted / var_response
+summary_table <- tibble(
+  Metric = c("Variance of Response (A)", 
+             "Variance of Fitted Values (B)", 
+             "Variance of Residuals", 
+             "Model R² (B/A)"),
+  Value = c(var_response, var_fitted, var_residuals, r_squared)
+)
+
+summary_table |>
+  kable(format = "html", digits = 4, caption = "Regression Model Variance Summary") |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = F)
 ```
 
