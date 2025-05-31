@@ -15,7 +15,11 @@ execute:
 bibliography: references.bib
 ---
 
+
+
 ## Setup
+
+
 
 ```{r setup}
 library(tidyverse)
@@ -35,7 +39,11 @@ coal_per_cap <- read_csv("Data/coal_consumption_per_cap.csv",
 
 ```
 
+
+
 ## Pivoting/Joining the Data
+
+
 
 ```{r}
 life_expectancy <- life_expectancy |>
@@ -60,6 +68,8 @@ lex_coal <- coal_per_cap |>
                                  destination = "continent")) 
 ```
 
+
+
 ## Data Description
 
 In this investigative report we will be exploring the relationship between two quantitative variables across countries/years:
@@ -83,6 +93,8 @@ Finally, we combined these two data sets so that for each observation (country a
 We hypothesize that infant life expectancy will have a negative association with coal consumption after adjusting for year. This is because burning coal releases many by products into the atmosphere that form toxic chemicals, and "continuous inhalation of these hazardous substances triggers many diseases such respiratory and cardiovascular disease, systemic inflammation, and neurodegeneration"  [@Gasparotto_Da_Boit_Martinello_2021]. However, with the elimination of a lot of the infectious disease deaths that affected young children and the better understanding of treading cardiovascular conditions and cancer, life expectancy has drastically increased each year [@Crimmins_2015]. Therefore, we will have to adjust for this effect in our analysis to see if there is a negative association between coal consumption and infant life expectancy like we expect.
 
 ## Data Visualization
+
+
 
 
 ```{r}
@@ -152,9 +164,13 @@ anim
 
 anim_save("coal_infant_by_continent.gif", animation = anim)
 ```
+
+
 ![Animated Relationship](coal_infant_by_continent.gif)
 
 ## Linear Regression Model
+
+
 
 ```{r}
 
