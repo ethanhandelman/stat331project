@@ -20,12 +20,14 @@ bibliography: references.bib
 ```{r setup}
 library(tidyverse)
 library(knitr)
+library(kableExtra)
 library(ggplot2)
 library(plotly)
 library(gganimate)
 library(gifski)
 library(png)
 library(countrycode)
+library(broom)
 
 life_expectancy <- read_csv("Data/lex.csv")
 coal_per_cap <- read_csv("Data/coal_consumption_per_cap.csv",
@@ -84,7 +86,7 @@ We hypothesize that infant life expectancy will have a negative association with
 
 
 ```{r}
-p <- lex_coal |>
+lex_coal_cont <- lex_coal |>
   filter(!is.na(coal_cons_per_cap), !is.na(infant_lex)) |>
   
   group_by(continent, country) |>
@@ -93,8 +95,9 @@ p <- lex_coal |>
             .groups = "drop") |>
   filter(mean_coal != 0 & mean_infant != 0) |>
   mutate(log_mean_coal = log(mean_coal),
-         log_mean_infant = log(mean_infant)) |>
+         log_mean_infant = log(mean_infant))
   
+lex_coal_cont|>
   ggplot(mapping = aes(x = log_mean_coal, 
                        y = log_mean_infant, 
                        label = country,
@@ -150,4 +153,22 @@ anim
 anim_save("coal_infant_by_continent.gif", animation = anim)
 ```
 ![Animated Relationship](coal_infant_by_continent.gif)
+
+## Linear Regression Model
+
+```{r}
+
+model <- lm(log_mean_infant ~ log_mean_coal, data = lex_coal_cont)
+
+coefs <- broom::tidy(model)
+
+knitr::kable(
+  coefs,
+  digits  = 3,
+  caption = "Regression Coefficients\n(log Mean Infant Life Expectancy ∼ log Mean Coal Consumption)",
+  col.names = c("Term", "Estimate", "Std. Error", "t value", "p value")
+) |>
+  kableExtra::kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover"))
+
+```
 
