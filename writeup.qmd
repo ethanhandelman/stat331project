@@ -25,6 +25,7 @@ library(plotly)
 library(gganimate)
 library(gifski)
 library(png)
+library(countrycode)
 
 life_expectancy <- read_csv("Data/lex.csv")
 coal_per_cap <- read_csv("Data/coal_consumption_per_cap.csv",
@@ -51,7 +52,10 @@ coal_per_cap <- coal_per_cap |>
 lex_coal <- coal_per_cap |>
   left_join(life_expectancy, by = c("country", "year")) |>
   filter(!is.na(coal_cons_per_cap), !is.na(infant_lex)) |>
-  mutate(year = as.integer(year))
+  mutate(year = as.integer(year),
+         continent = countrycode(sourcevar = country,
+                                 origin    = "country.name",
+                                 destination = "continent")) 
 ```
 
 ## Data Description
@@ -81,9 +85,12 @@ We hypothesize that infant life expectancy will have a negative association with
 
 ```{r}
 p <- lex_coal |>
-  group_by(country) |>
+  filter(!is.na(coal_cons_per_cap), !is.na(infant_lex)) |>
+  
+  group_by(continent, country) |>
   summarize(mean_coal = mean(coal_cons_per_cap),
-            mean_infant = mean(infant_lex)) |>
+            mean_infant = mean(infant_lex),
+            .groups = "drop") |>
   filter(mean_coal != 0 & mean_infant != 0) |>
   mutate(log_mean_coal = log(mean_coal),
          log_mean_infant = log(mean_infant)) |>
@@ -91,6 +98,7 @@ p <- lex_coal |>
   ggplot(mapping = aes(x = log_mean_coal, 
                        y = log_mean_infant, 
                        label = country,
+                       color = continent,
                        text = paste0("<b>Country:</b> ", 
                                      country, 
                                      "<br>"))) +
@@ -119,8 +127,12 @@ p_anim <- ggplot(lex_coal, aes(x = coal_cons_per_cap, y = infant_lex)) +
     x = "Coal Consumption per Capita (tonnes oil equivalent)",
     y = "Infant Life Expectancy (years)"
   ) +
+  scale_color_brewer(palette = "Dark2") +
   theme_minimal(base_size = 14) +
-  theme(plot.subtitle = element_text(size = 16, face = "bold")) +
+  theme(
+    plot.subtitle = element_text(size = 16, face = "bold"),
+    legend.position = "right"
+  ) +
   transition_time(year) +
   ease_aes("linear")
 
@@ -134,6 +146,8 @@ anim <- animate(
 )
 
 anim
-```
 
+anim_save("coal_infant_by_continent.gif", animation = anim)
+```
+![Animated Relationship](coal_infant_by_continent.gif)
 
