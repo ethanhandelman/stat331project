@@ -22,6 +22,10 @@ library(tidyverse)
 library(knitr)
 library(ggplot2)
 library(plotly)
+library(gganimate)
+library(gifski)
+library(png)
+
 life_expectancy <- read_csv("Data/lex.csv")
 coal_per_cap <- read_csv("Data/coal_consumption_per_cap.csv",
            na = c("NA", ""))
@@ -45,7 +49,9 @@ coal_per_cap <- coal_per_cap |>
   drop_na(coal_cons_per_cap)
 
 lex_coal <- coal_per_cap |>
-  left_join(life_expectancy, by = c("country", "year"))
+  left_join(life_expectancy, by = c("country", "year")) |>
+  filter(!is.na(coal_cons_per_cap), !is.na(infant_lex)) |>
+  mutate(year = as.integer(year))
 ```
 
 ## Data Description
@@ -70,7 +76,8 @@ Finally, we combined these two data sets so that for each observation (country a
 
 We hypothesize that infant life expectancy will have a negative association with coal consumption after adjusting for year. This is because burning coal releases many by products into the atmosphere that form toxic chemicals, and "continuous inhalation of these hazardous substances triggers many diseases such respiratory and cardiovascular disease, systemic inflammation, and neurodegeneration"  [@Gasparotto_Da_Boit_Martinello_2021]. However, with the elimination of a lot of the infectious disease deaths that affected young children and the better understanding of treading cardiovascular conditions and cancer, life expectancy has drastically increased each year [@Crimmins_2015]. Therefore, we will have to adjust for this effect in our analysis to see if there is a negative association between coal consumption and infant life expectancy like we expect.
 
-##Data Visualization
+## Data Visualization
+
 
 ```{r}
 p <- lex_coal |>
@@ -98,4 +105,35 @@ p <- lex_coal |>
 ggplotly(p, tooltip = "text")
 
 ```
+
+```{r}
+p_anim <- ggplot(lex_coal, aes(x = coal_cons_per_cap, y = infant_lex)) +
+  geom_point(alpha = 0.7, size = 2, color = "#2c3e50") +
+  # For raw‐scale axes, comment these out; 
+  # for log log, uncomment them:
+  # scale_x_continuous(trans = "log10") +
+  # scale_y_continuous(trans = "log10") +
+  labs(
+    title = "Infant Life Expectancy vs. Coal Consumption",
+    subtitle = "Year: {frame_time}",
+    x = "Coal Consumption per Capita (tonnes oil equivalent)",
+    y = "Infant Life Expectancy (years)"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(plot.subtitle = element_text(size = 16, face = "bold")) +
+  transition_time(year) +
+  ease_aes("linear")
+
+anim <- animate(
+  p_anim,
+  nframes = length(unique(lex_coal$year)) * 5,
+  fps = 10,
+  width = 800,
+  height = 600,
+  renderer = gifski_renderer(loop = TRUE)
+)
+
+anim
+```
+
 
