@@ -171,6 +171,8 @@ knitr::kable(
 
 ```
 
+## Variance Summary
+
 ```{r}
 var_response <- var(lex_coal_cont$log_mean_infant)
 var_fitted <- var(fitted(model))
@@ -189,3 +191,6 @@ summary_table |>
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = F)
 ```
 
+## Analysis
+
+In our model, our R-squared value is 0.2042. As a result, approximately 20.4% of the variability in log infant mortality rate is explained by the log of coal exposure. Since our p value is below 0.05, we are able to say that the relationship between infant mortality rate and coal exposure is statistically significant. In conclusion, our model explains about one fifth of the variability in infant mortality.
