@@ -5,6 +5,7 @@ format:
   html:
     embed-resources: true
     code-tools: true
+    code-fold: true
     toc: true
 editor: source
 execute: 
@@ -189,3 +190,42 @@ summary_table |>
 ## Analysis
 
 In our model, our R-squared value is 0.2042. As a result, approximately 20.4% of the variability in log infant mortality rate is explained by the log of coal exposure. Since our p value is below 0.05, we are able to say that the relationship between infant mortality rate and coal exposure is statistically significant. In conclusion, our model explains about one fifth of the variability in infant mortality.
+
+## Cross Validation
+
+**Performing the Validation**
+```{r}
+set.seed(2025)
+
+# determine number of folds
+n <- nrow(lex_coal_cont)
+k <- floor(n / 10)
+
+# assign rows to folds randomly
+fold_id <- sample(rep(1:k, length.out = n))
+
+#function for fitting
+compute_fold_r2 <- function(fold, data, fold_id) {
+  train_df <- data[fold_id != fold, ]
+  test_df  <- data[fold_id == fold, ]
+  mod      <- lm(log_mean_infant ~ log_mean_coal, data = train_df)
+  preds    <- predict(mod, newdata = test_df)
+  var(preds) / var(test_df$log_mean_infant)
+}
+
+# perform the cross validation
+cv_results <- tibble(fold = 1:k) |>
+  mutate(
+    r2 = map_dbl(fold, compute_fold_r2,
+                 data = lex_coal_cont,
+                 fold_id = fold_id)
+  )
+
+cv_results
+```
+
+**Visualization**
+```{r}
+
+```
+
