@@ -167,7 +167,7 @@ knitr::kable(
 
 ```
 
-## Variance Summary
+**Variance Summary**
 
 ```{r}
 var_response <- var(lex_coal_cont$log_mean_infant)
@@ -187,7 +187,7 @@ summary_table |>
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = F)
 ```
 
-## Analysis
+**Analysis**
 
 In our model, our R-squared value is 0.2042. As a result, approximately 20.4% of the variability in log infant mortality rate is explained by the log of coal exposure. Since our p value is below 0.05, we are able to say that the relationship between infant mortality rate and coal exposure is statistically significant. In conclusion, our model explains about one fifth of the variability in infant mortality.
 
@@ -221,11 +221,23 @@ cv_results <- tibble(fold = 1:k) |>
                  fold_id = fold_id)
   )
 
-cv_results
+cv_results |>
+  kable()
 ```
 
 **Visualization**
 ```{r}
+mean_r2 <- mean(cv_results$r2)
 
+ggplot(cv_results, aes(x = r2)) +
+  geom_histogram(binwidth = 0.02, color = "black", fill = "lightblue") +
+  geom_vline(xintercept = mean_r2, linetype = "dashed", size = 1) +
+  labs(
+    title = "Distribution of Cross-Validated R^2 Values",
+    subtitle = paste0("k = ", k, " folds; mean R² = ", round(mean_r2, 3)),
+    x = expression(R^2),
+    y = "Count"
+  ) +
+  theme_minimal(base_size = 14)
 ```
 
