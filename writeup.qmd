@@ -97,7 +97,7 @@ lex_coal_cont <- lex_coal |>
   filter(mean_coal != 0 & mean_infant != 0) |>
   mutate(log_mean_coal = log(mean_coal),
          log_mean_infant = log(mean_infant))
-  
+
 p <- lex_coal_cont |>
   ggplot(mapping = aes(x = log_mean_coal, 
                        y = log_mean_infant, 
@@ -108,13 +108,13 @@ p <- lex_coal_cont |>
                                      "<br>"))) +
   geom_point() +
   geom_smooth(
-  method = "lm",
-  se = FALSE,
-  color = "black",
-  linetype = "dashed",
-  inherit.aes = FALSE,
-  mapping = aes(x = log_mean_coal, y = log_mean_infant)
-) +
+    method = "lm",
+    se = FALSE,
+    color = "black",
+    linetype = "dashed",
+    inherit.aes = FALSE,
+    mapping = aes(x = log_mean_coal, y = log_mean_infant)
+  ) +
   labs(x = "Log Mean Coal Consumption (tonnes oil equivalent)",
        y = "Log Infant Life Expectancy (years)",
        title = "Infant Life Expectancy vs Coal Consumption by Country") + theme(axis.title = element_text(size = 10),
@@ -130,18 +130,32 @@ ggplotly(p, tooltip = "text") |>
       xanchor = "center"     
     )
   )
-
 ```
 
+The above graph shows the relationship between mean coal consumption and mean infant life expectancy. We can see that a 2-fold increase in the mean coal consumption per capita is associated with an increase in the predicted mean infant life expectancy by a factor of 1.012. Additionally, we can see that on average, the mean infant life expectancy in Oceania, Europe and the Americas is higher than the mean infant life expectancy in Asia and Africa. Finally, we can see that South Africa appears to be an outlier, with one of the highest observed mean coal consumption per capita but the lowest mean infant life expectancy.
+
 ```{r animated_colored, dev = "png",dev.args = list(type = "cairo")}
-p_anim <- ggplot(lex_coal, aes(x = coal_cons_per_cap, y = infant_lex)) +
-  geom_point(alpha = 0.7, size = 2, color = "#2c3e50") +
+#| eval: false
+
+p_anim <- lex_coal |>
+  filter(coal_cons_per_cap != 0 & infant_lex != 0) |>
+  mutate(char_nudge = nchar(country) * -0.07) |>
+  ggplot(aes(x = log(coal_cons_per_cap), 
+             y = log(infant_lex),
+             color = continent,
+             group = country)) +
+  geom_point(alpha = 0.7, 
+             size = 2) +
   labs(
     title = "Infant Life Expectancy vs. Coal Consumption",
     subtitle = "Year: {frame_time}",
-    x = "Coal Consumption per Capita (tonnes oil equivalent)",
-    y = "Infant Life Expectancy (years)"
+    x = "Log Coal Consumption per Capita (tonnes oil equivalent)",
+    y = "Log Infant Life Expectancy (years)"
   ) +
+  geom_text(aes(x = log(coal_cons_per_cap) + char_nudge,
+                label = country),
+            family = "mono",
+            check_overlap = TRUE) +
   scale_color_brewer(palette = "Dark2") +
   theme_minimal(base_size = 14) +
   theme(
@@ -151,24 +165,26 @@ p_anim <- ggplot(lex_coal, aes(x = coal_cons_per_cap, y = infant_lex)) +
   transition_time(year) +
   ease_aes("linear")
 
-# anim <- animate(
-#   p_anim,
-#   nframes = length(unique(lex_coal$year)) * 5,
-#   fps = 10,
-#   width = 800,
-#   height = 600,
-#   renderer = gifski_renderer(loop = TRUE)
-# )
-# 
-# anim
-# 
-# anim_save("coal_infant_by_continent.gif", animation = anim)
+anim <- animate(
+  p_anim,
+  nframes = length(unique(lex_coal$year)) * 5,
+  fps = 10,
+  width = 800,
+  height = 600,
+  renderer = gifski_renderer(loop = TRUE)
+)
+
+anim
+
+anim_save("coal_infant_by_continent2.gif", animation = anim)
 ```
-![Animated Relationship](coal_infant_by_continent.gif)
+![Animated Relationship](coal_infant_by_continent2.gif)
 
-## Linear Regression Model
+The above graph shows that over time, both the infant life expectancy and coal consumpiton per capita has increased in all countries. We can see a big increase in coal consumption per capita across many Asian countries.
 
-Below we have a linear regression model measuring the log of the average infant life expectancy based off of the log of the average coal consumption.
+## Linear Regression Models
+
+We used a linear regression model to predict the log mean infant life expectancy (years) form the log mean coal consumption per capita (tonnes oil equivalent).
 
 ```{r}
 
@@ -207,7 +223,53 @@ summary_table |>
 
 **Analysis**
 
-In our model, our R-squared value is 0.2042. As a result, approximately 20.4% of the variability in log infant mortality rate is explained by the log of coal exposure. Since our p value is below 0.05, we are able to say that the relationship between infant mortality rate and coal exposure is statistically significant. In conclusion, our model explains about one fifth of the variability in infant mortality.
+In our model, our R-squared value is 0.2042. As a result, approximately 20.4% of the variance in log mean infant mortality rate is explained by the variance in log mean coal consumption per capita. Since our p value is below 0.05, we are able to say that the relationship between infant mortality rate and coal exposure is statistically significant. In conclusion, our model explains about one fifth of the variability in infant mortality.
+
+**Improved Model**
+
+To investigate the effect of the progression of medical technology and its effect on year, we add the variable year to our model.
+
+```{r}
+
+model <- lm(log(infant_lex) ~ log(coal_cons_per_cap) + year, 
+            data = lex_coal |> filter(coal_cons_per_cap != 0))
+coefs <- broom::tidy(model)
+
+knitr::kable(
+  coefs,
+  digits  = 3,
+  caption = "Regression Coefficients\n(log Mean Infant Life Expectancy ∼ log Mean Coal Consumption)",
+  col.names = c("Term", "Estimate", "Standard Error", "t value", "p value")
+) |>
+  kableExtra::kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover"))
+
+```
+
+**Variance Summary**
+
+```{r}
+var_response <- var(lex_coal_cont$log_mean_infant)
+var_fitted <- var(fitted(model))
+var_residuals <- var(residuals(model))
+r_squared <- var_fitted / var_response
+summary_table <- tibble(
+  Metric = c("Variance of Response (A)", 
+             "Variance of Fitted Values (B)", 
+             "Variance of Residuals", 
+             "Model R² (B/A)"),
+  Value = c(var_response, var_fitted, var_residuals, r_squared)
+)
+
+summary_table |>
+  kable(format = "html", digits = 4, caption = "Regression Model Variance Summary") |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = F)
+```
+
+**Analysis**
+
+In our new model, our R-squared value is 0.7185. As a result, approximately 71.85% of the variance in log infant mortality rate is explained by the variance in log coal consumption per capita and year. Since our p value is below 0.05, we are able to say that the relationship between infant mortality rate and coal exposure is statistically significant. In conclusion, our model explains about one fifth of the variability in infant mortality.
+
+While the estimated slope coefficient of coal log consumption per capita is smaller, it is still positive, indicating that an increase in coal consumption leads to an increase in predicted infant life expectancy. This goes against what we hypothesized, though we suspect that the reason for the discrepancy is confounding variables like GDP. More analysis is needed to understand why coal consumption per capita is associated with an increase in infant life expectancy. 
 
 ## Cross Validation
 
