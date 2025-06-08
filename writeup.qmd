@@ -269,8 +269,6 @@ summary_table |>
 
 In our new model, our R-squared value is 0.7185. As a result, approximately 71.85% of the variance in log infant mortality rate is explained by the variance in log coal consumption per capita and year. Since our p value is below 0.05, we are able to say that the relationship between infant mortality rate and coal exposure is statistically significant. In conclusion, our model explains about one fifth of the variability in infant mortality.
 
-While the estimated slope coefficient of coal log consumption per capita is smaller, it is still positive, indicating that an increase in coal consumption leads to an increase in predicted infant life expectancy. This goes against what we hypothesized, though we suspect that the reason for the discrepancy is confounding variables like GDP. More analysis is needed to understand why coal consumption per capita is associated with an increase in infant life expectancy. 
-
 ## Cross Validation
 
 **Performing the Validation**
@@ -322,3 +320,6 @@ ggplot(cv_results, aes(x = r2)) +
   theme_minimal(base_size = 14)
 ```
 
+## Conclusion
+
+While the estimated slope coefficient of coal log consumption per capita is smaller in our second model than in our first model, it is still positive. This indicates that an increase in coal consumption leads to an increase in predicted infant life expectancy. This goes against what we hypothesized, though we suspect that the reason for the discrepancy is confounding variables like GDP. More analysis is needed to understand why coal consumption per capita is associated with an increase in infant life expectancy. 
